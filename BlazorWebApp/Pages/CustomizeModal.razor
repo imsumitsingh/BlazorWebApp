@@ -1,0 +1,40 @@
+﻿<div class="modal fade @showhide.Showing" id="exampleModalCenter" style="display:@showhide.Display;background-color:rgba(0,0,0,0.6)" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog @*modal-dialog-centered*@" role="document">
+        <div class="modal-content shadow-sm" style="width:60%;transform:translate(50%)">
+            <div class="modal-header text-muted @modal.Type" style="padding-top: 5px; padding-bottom: 5px; padding-right: 7px; padding-left: 7px; border-bottom:none">
+                <h5 class="modal-title" id="exampleModalLongTitle" style="font-size:90%;letter-spacing:1px">@modal.HeaderText</h5>
+                <button onclick="@InvokeExternalMethodClose" type="button" class="close text-white" style=" background-color: transparent; border: none; color: white; font-weight: 900;" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true"><b>&times;</b></span>
+                </button>
+            </div>
+            <div class="modal-body" style=" padding-top:7px;padding-bottom:7px;padding-left: 10px; padding-left: 10px;">
+                @modal.BodyText
+            </div>
+            <div class="modal-footer" style="padding:5px;border-top:none">
+                <button onclick="@InvokeExternalMethodClose" type="button" class="btn btn-sm @modal.LeftBuutonClass text-white" data-dismiss="modal">@modal.LeftBuutonText</button>
+                <button onclick="@InvokeExternalMethodAction" type="button" class="btn btn-sm btn @modal.RightBuutonClass text-white">@modal.RightBuutonText</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public BlazorWebApp.Models.CustomModal modal { get; set; }
+    [Parameter]
+    public BlazorWebApp.Models.ShowHideModal showhide { get; set; }
+    [Parameter]
+    public Action ExternalMethodForShowHide { get; set; }
+    [Parameter]
+    public Action ExternalMethodForForAction { get; set; }
+
+
+    protected void InvokeExternalMethodClose()
+    {
+        ExternalMethodForShowHide?.Invoke();
+    }
+    protected void InvokeExternalMethodAction()
+    {
+        ExternalMethodForForAction?.Invoke();
+    }
+}

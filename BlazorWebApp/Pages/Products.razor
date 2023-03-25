@@ -1,0 +1,105 @@
+﻿@page "/products"
+@using BlazorWebApp.Data.DB
+@using CSharp;
+@using BlazorWebApp.Models
+@using BlazorWebApp.Services
+@inject ProductServices productService;
+
+
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary rounded p-4">
+        <div class="col-12">
+            <div class="bg-secondary rounded h-100 p-4">
+                <div class="row justify-content-between">
+                    <div class="col-md-2">
+                        <h6 class="mb-4">Products</h6>
+                    </div>
+                    <div class="col-md-3">
+                        <a class="btn btn-sm btn-dark text-muted" style="padding: 6px 10px;" href="/products/product-detail/"><i class="fa fa-plus"></i></a>
+                        <input id="txtSearch" style="display:inline-block;width:85%" @bind-value="searchText" @bind-value:event="oninput" onkeyup="@Search" class="form-control bg-dark border-0 float-right" type="search" placeholder="Search">
+                    </div>
+                </div>
+                <div class="table-responsive scroll">
+                    <table class="table  scrolldown">
+                        <thead class="bg-dark text-muted">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Image</th>
+                                <th scope="col">Product Name</th>                               
+                                <th scope="col">Price</th>                               
+                                <th scope="col">Discontinue</th>                               
+                                <th scope="col">Action</th>                               
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in prod)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>
+                                        @if (string.IsNullOrEmpty(item.Image))
+                                        {
+                                            <img class="rounded-1" src="img/comingsoon.png" alt="" style="width: 35px; height: 35px;">
+                                        }
+                                        else
+                                        {
+                                            <img class="rounded-1" src="@item.Image" alt="" style="width: 35px; height: 35px;">
+                                        }
+                                    </td>
+                                    <td>@item.ProductName</td>
+                                    
+                                    <td>@item.SalePrice</td>
+                                    <td>
+                                        @if (item.IsDiscontinued)
+                                        {
+                                            <input type="checkbox" class="form-check-input"  checked/> 
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="form-check-input" />
+
+                                        }
+                                    </td>
+                                <td><a class="btn btn-sm btn-dark text-muted" href="/products/product-detail/@item.ProductId">Detail</a></td>
+                                
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code{
+    private List<BlazorWebApp.Models.Product> prod = new();
+    private List<BlazorWebApp.Models.Supplier> supp = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        prod = productService.Get();
+        
+    }
+    private string searchText = string.Empty;
+    protected void Search(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && searchText.Length >= 2)
+        {
+            var FilterdData = prod.Where(e => e.ProductName.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) || e.Thumbnail.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) || e.SupplierId.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase) || e.SalePrice.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
+            prod = FilterdData;
+        }
+        else
+        {
+            prod = productService.Get();
+        }
+    }
+
+    
+}

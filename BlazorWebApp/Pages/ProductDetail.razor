@@ -1,0 +1,254 @@
+﻿@page "/products/product-detail/{PID?}"
+@using BlazorWebApp.Data.DB
+@using BlazorWebApp.Pages
+@using CSharp;
+@using BlazorWebApp.Models
+@using BlazorWebApp.Services
+@using System.IO
+@inject ProductServices productService;
+@inject SupplierServices supplierService;
+@inject CategoryServices categoryService;
+@inject SubCategoryServices subCategoryService;
+@inject IWebHostEnvironment env
+@inject NavigationManager navigate
+
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-secondary rounded p-4">
+        <div class="col-12">
+            <div class="row justify-content-between">
+                <div class="col-md-2">
+                    @if (product.Id ==0)
+                    {
+                        <h6 class="mb-4">Add Product</h6>
+                    }
+                    else
+                    {
+                        <h6 class="mb-4">Update Product</h6>
+                    }
+
+                </div>
+                
+            </div>
+           <CustomizeModal  ExternalMethodForShowHide="@DisplyPopup" modal="@modal" showhide="@showhide"></CustomizeModal>
+            <EditForm Model="@product" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+                <DataAnnotationsValidator />
+                <div class="row">
+                    <div class="col-9">
+                       
+                        <div class="row mb-3">
+                            <InputNumber @bind-Value="product.Id" style="display:none" class="form-control" />
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-3">
+                                <InputText @bind-Value="product.ProductId" class="form-control" disabled />
+                                </div>
+                            <div class="col-sm-7">
+                                        <InputText @bind-Value="product.ProductName" class="form-control" />
+                                        <ValidationMessage class="text-primary" For="@(()=>product.ProductName)" />
+
+                             </div>
+                                </div>
+
+                        <div class="row mb-3">
+
+                            <label for="inputEmail3" class="col-sm-2 col-form-label">Sale Price</label>
+                            <div class="col-sm-2">
+                                <InputNumber @bind-Value="product.SalePrice" class="form-control" />
+
+                            </div>
+                            <label for="inputEmail3" class="col-sm-1 col-form-label text-right">MRP</label>
+                            <div class="col-sm-2">
+                                <InputNumber @bind-Value="product.Mrp" class="form-control" />
+
+                            </div>
+                            <label for="inputEmail3" class="col-sm-1 col-form-label text-right">Discount</label>
+                            <div class="col-sm-1">
+                                <InputNumber @bind-Value="product.Discount" class="form-control" />
+
+                            </div>
+                            <label for="inputEmail3" class="col-sm-1 col-form-label text-right">Tax</label>
+                            <div class="col-sm-2">
+                                <InputSelect @bind-Value="product.Tax" class="form-select">                                    
+                                    <option value="5">5%</option>
+                                    <option value="10">10%</option>
+                                    <option value="15">20%</option>                                    
+                                </InputSelect>
+
+                            </div>
+                        </div>
+
+                                <div class="row mb-3">
+
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Supplier</label>
+                                    <div class="col-sm-10">
+                                        <InputSelect @bind-Value="product.SupplierId" class="form-select">
+                                            <option value="">--Select--</option>
+                                            @foreach (var sp in supp)
+                                            {
+
+                                                <option value="@sp.SupplierId">@sp.ContactName</option>
+                                            }
+                                        </InputSelect>
+
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Category</label>
+                                    <div class="col-sm-10">
+                                        <InputSelect @oninput="CategoryChange" @bind-Value="product.CategoryId" class="form-select">
+                                            <option value="">--Select--</option>
+                                            @foreach (var sp in cat)
+                                            {
+
+                                                <option value="@sp.CategoryId">@sp.Name</option>
+                                            }
+                                        </InputSelect>
+
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+
+                                    <label for="inputEmail3" class="col-sm-2 col-form-label">Sub-Category</label>
+                                    <div class="col-sm-10">
+                                        <InputSelect @bind-Value="product.SubCatId" class="form-select">
+                                            <option value="">--Select--</option>
+                                            @foreach (var sp in subCat)
+                                            {
+                                                <option value="@sp.SubCategoryId">@sp.Name</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                </div>
+
+
+                                <div class="row mb-3">
+                                    <legend class="col-form-label col-sm-2 pt-0">Discontinue</legend>
+                                    <div class="col-sm-10">
+                                        <div class="form-check">
+                                            <InputCheckbox class="form-check-input" @bind-Value="product.IsDiscontinued" />
+                                            <label class="form-check-label" for="gridCheck1">
+                                                Product is discontinued
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    <div class="col-3">
+                        <div style="overflow:hidden">
+                            <img src="@ImgUrl" style="width: 240px; height: 250px;" />
+
+                        </div>
+                        <div class="mt-1">
+                            <InputFile OnChange="OnInputFileChange" style="width:250px;display:none" accept=".png,.jpeg,.jpg" class="" id="fileInput" />
+                            <label for="fileInput" style="cursor: pointer; width: 240px;" class="btn btn-outline-primary"><i class="fa fa-file me-2"></i>Choose Product Image</label>
+                        </div>
+
+
+                    </div>
+               
+                    <div class="col-12">
+                        @if (product.Id==0)
+                        {
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="button" onclick="@DisplyPopup" class="btn btn-danger">Delete</button>
+                            
+                        }
+                    </div>
+                
+                </div>
+
+            </EditForm>
+            @if (displayUserAddedToDB)
+            {
+                <div class="text-warning mt-2">Product Updated to DB</div>
+            }
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public string? PID { get; set; }
+    protected Product product = new();
+    protected List<Supplier> supp = new();
+    protected List<Category> cat = new();
+    protected List<SubCategory> subCat = new();
+    public string ImgUrl = string.Empty;
+    bool displayValidationErrorMessages = false;
+    bool displayUserAddedToDB = false;
+    protected CustomModal modal = new();
+    protected ShowHideModal showhide = new();
+    protected override async Task OnInitializedAsync()
+    {
+
+        product = productService.Get().Where(e => e.ProductId == PID).FirstOrDefault()?? new Product();
+        cat = categoryService.Get();
+        subCat = subCategoryService.Get().Where(e=>e.CatId==product.CategoryId).ToList();
+        supp = supplierService.Get();
+        ImgUrl = string.IsNullOrEmpty(product?.Image) ? "/img/comingsoon.png" : product?.Image;
+        if (product.ProductId is null)
+        {
+            product.ProductId = productService.GenerateID();
+        }
+
+    }
+    async void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.GetMultipleFiles()[0];
+            Stream stream = file.OpenReadStream(5053972);
+            var path = $"{env.WebRootPath}\\img\\{file.Name}";
+            FileStream fs = File.Create(path);
+            await stream.CopyToAsync(fs);
+            stream.Close();
+            fs.Close();
+            ImgUrl = $"/img/{file.Name}";
+            product.Image = ImgUrl;
+            this.StateHasChanged();
+        }
+        catch (Exception)
+        {
+
+
+        }
+
+    }
+    private void HandleValidSubmit(EditContext context)
+    {
+
+        int i= productService.Add(product);
+        if (i>0)
+        {
+            displayUserAddedToDB = true;
+        }
+
+    }
+
+    private void HandleInvalidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = true;
+        displayUserAddedToDB = false;
+
+    }
+
+    private void DisplyPopup()
+    {
+        showhide.Visible = !showhide.Visible;
+    }
+    private void CategoryChange(ChangeEventArgs ev)
+    {
+        subCat = subCategoryService.Get().Where(e => e.CatId ==Convert.ToString(ev.Value)).ToList();
+    }
+
+}

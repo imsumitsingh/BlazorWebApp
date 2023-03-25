@@ -1,0 +1,51 @@
+﻿@using IgniteUI.Blazor.Controls
+@inject IIgniteUIBlazor IgniteUIBlazor
+
+<div class="container">
+    <div id="root" style="display: flex;">
+        <style>
+            igc-nav-drawer::part(base) {
+                background: #2d313a;
+            }
+
+            igc-nav-drawer-item::part(base) {
+                color: #fff;
+            }
+
+                igc-nav-drawer-item::part(base):hover {
+                    background-color: #3D4149;
+                }
+
+            igc-nav-drawer-item[active]::part(base) {
+                background: #f3c03e;
+                color: #2c2c2c
+            }
+
+            igc-nav-drawer-header-item {
+                color: #f3c03e
+            }
+        </style>
+
+        <IgbNavDrawer Position="NavDrawerPosition.Top" id="navDrawer" Open="false">
+            <IgbNavDrawerHeaderItem>
+                Sample Drawer
+            </IgbNavDrawerHeaderItem>
+
+            <IgbNavDrawerItem>
+                
+                <span slot="content">Home</span>
+            </IgbNavDrawerItem>
+
+            <IgbNavDrawerItem>               
+                <span slot="content">Search</span>
+            </IgbNavDrawerItem>
+        </IgbNavDrawer>
+    </div>
+</div>
+
+@code {
+
+    
+}
+
+
